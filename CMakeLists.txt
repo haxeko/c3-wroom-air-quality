@@ -6,11 +6,17 @@ if(NOT DEFINED ENV{ESP_MATTER_PATH})
     message(FATAL_ERROR "Please set ESP_MATTER_PATH to the path of esp-matter repo")
 endif(NOT DEFINED ENV{ESP_MATTER_PATH})
 
-# Firmware version, e.g. 1.0.49: see tools/firmware_version.cmake. Change
+# Firmware version, e.g. 1.0.192: see tools/firmware_version.cmake. Change
 # FIRMWARE_VERSION_BASE for a major/minor release.
 set(FIRMWARE_VERSION_BASE "1.0")
+# Added to the number of commits of this repository. The project moved here
+# from haxeko/ESP32-IoT-Project at build 191, with the 10 commits of its own
+# history: 181 makes the first commit made here build 192, so that devices and
+# controllers still see every newer build as an update. Never lower it.
+set(FIRMWARE_BUILD_OFFSET 181)
 include(${CMAKE_CURRENT_LIST_DIR}/tools/firmware_version.cmake)
-firmware_version(${CMAKE_CURRENT_LIST_DIR} ${FIRMWARE_VERSION_BASE} PROJECT_VER PROJECT_VER_NUMBER)
+firmware_version(${CMAKE_CURRENT_LIST_DIR} ${FIRMWARE_VERSION_BASE} ${FIRMWARE_BUILD_OFFSET}
+                 PROJECT_VER PROJECT_VER_NUMBER)
 message(STATUS "Firmware version ${PROJECT_VER} (${PROJECT_VER_NUMBER})")
 
 set(ESP_MATTER_PATH $ENV{ESP_MATTER_PATH})
@@ -28,7 +34,8 @@ project(matter_pm25_sensor)
 
 # build/firmware/<vendor>_<model>_<tag>_v<version>_<target>_merged.bin after
 # every build. The tag tells these files apart from those of the radar version
-# (ESP32-C3/matter-wifi/matter-pm25-sensor), which have the same model name.
+# (ESP32-C3/matter-wifi/matter-pm25-sensor in the haxeko/ESP32-IoT-Project
+# repository), which have the same model name.
 set(FIRMWARE_FILE_TAG "pcb")
 # Diagnostics builds (sdkconfig.diag and the overlays added to it) get names of their own.
 if(CONFIG_APP_DIAG)

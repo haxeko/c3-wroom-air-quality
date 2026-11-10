@@ -2,8 +2,9 @@
 #
 # Version <major>.<minor>.<build>, e.g. 1.0.49:
 # - <major>.<minor> is FIRMWARE_VERSION_BASE in CMakeLists.txt, changed by hand.
-# - <build> is the number of commits in the repository: a commit always gets
-#   the same version and a newer commit a higher one. It is also the Matter
+# - <build> is the number of commits in the repository plus
+#   FIRMWARE_BUILD_OFFSET (CMakeLists.txt): a commit always gets the same
+#   version and a newer commit a higher one. It is also the Matter
 #   SoftwareVersion that OTA updates compare.
 # - "-dev" is appended when the firmware sources have uncommitted changes.
 #
@@ -30,8 +31,9 @@ function(firmware_uncommitted_changes project_dir out_var)
     set(${out_var} "${changes}" PARENT_SCOPE)
 endfunction()
 
-# Sets <version_var> (e.g. "1.0.49") and <number_var> (e.g. 49) from <base> (e.g. "1.0").
-function(firmware_version project_dir base version_var number_var)
+# Sets <version_var> (e.g. "1.0.49") and <number_var> (e.g. 49) from <base> (e.g. "1.0")
+# and <build_offset>, the number added to the number of commits.
+function(firmware_version project_dir base build_offset version_var number_var)
     execute_process(COMMAND git rev-list --count HEAD
                     WORKING_DIRECTORY "${project_dir}"
                     OUTPUT_VARIABLE build_number
@@ -43,6 +45,7 @@ function(firmware_version project_dir base version_var number_var)
         message(WARNING "Not a git checkout, firmware build number set to 0")
         set(build_number 0)
     else()
+        math(EXPR build_number "${build_number} + ${build_offset}")
         # Re-run CMake (and pick up the new version) after every commit or checkout.
         execute_process(COMMAND git rev-parse --absolute-git-dir
                         WORKING_DIRECTORY "${project_dir}"

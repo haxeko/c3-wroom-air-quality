@@ -2,7 +2,7 @@
 
 Cảm biến bụi mịn PM2.5 và CO2 chuẩn **Matter over Wi-Fi** chạy trên ESP32-C3, thêm trực tiếp vào **Apple Home (HomeKit)**, Google Home, Home Assistant, SmartThings...
 
-Bản này dành cho **PCB không có radar LD2410**: PMS5003 ở GPIO6/7 (giắc J2B), OLED và cảm biến CO2 **SCD40/SCD41** dùng chung bus I2C ở GPIO4/5, LED WS2812 ở GPIO3, **nút nhấn ở GPIO10** (giữ 5 giây: factory reset; bấm đúp: chờ ghép nối; bấm 4 lần: đổi kiểu màn hình). Màn hình luôn sáng; có thể lắp thêm nút bật/tắt màn hình rồi chọn chân trong `menuconfig`. Phần đo PM2.5, mức chất lượng không khí và LED giống [bản có radar](../matter-wifi/matter-pm25-sensor/).
+Bản này dành cho **PCB không có radar LD2410**: PMS5003 ở GPIO6/7 (giắc J2B), OLED và cảm biến CO2 **SCD40/SCD41** dùng chung bus I2C ở GPIO4/5, LED WS2812 ở GPIO3, **nút nhấn ở GPIO10** (giữ 5 giây: factory reset; bấm đúp: chờ ghép nối; bấm 4 lần: đổi kiểu màn hình). Màn hình luôn sáng; có thể lắp thêm nút bật/tắt màn hình rồi chọn chân trong `menuconfig`. Phần đo PM2.5, mức chất lượng không khí và LED giống [bản có radar](https://github.com/haxeko/ESP32-IoT-Project/tree/main/ESP32-C3/matter-wifi/matter-pm25-sensor).
 
 Thiết bị dùng device type **Air Quality Sensor (0x002C)** và gửi qua Matter ba giá trị:
 
@@ -141,7 +141,8 @@ Build và nạp:
 . ./esp-idf/export.sh
 . ./esp-matter/export.sh
 
-cd ESP32-C3/matter-pm25-sensor
+git clone https://github.com/haxeko/c3-wroom-air-quality.git   # đầy đủ, không dùng --depth
+cd c3-wroom-air-quality
 idf.py set-target esp32c3
 idf.py menuconfig          # (tùy chọn) PM2.5 / CO2 Sensor Configuration, Button
 idf.py -p /dev/ttyACM0 flash monitor
@@ -228,7 +229,7 @@ File update chỉ ghi vùng chọn phân vùng OTA và firmware, nên vẫn ch�
 | Số serial | `<MAC Wi-Fi>`, ví dụ `8ED0B2A8594B` | Tự động, riêng cho từng chip |
 | Tên Bluetooth khi chờ ghép nối | `AirQuality-3840` | `CONFIG_BLE_DEVICE_NAME_PREFIX` trong `sdkconfig.defaults` |
 | Tên và loại thiết bị khi dò tìm trong mạng (DNS-SD `DN`, `DT`) | `Air Quality Sensor`, loại 0x002C | `main/chip_project_config.h`, `CONFIG_DEVICE_TYPE` |
-| Firmware | `1.0.<số commit>`, ví dụ `1.0.49` | Tự động, xem bên dưới |
+| Firmware | `1.0.<số build>`, ví dụ `1.0.192` | Tự động, xem bên dưới |
 
 ### Phiên bản firmware
 
@@ -241,7 +242,7 @@ Phiên bản có dạng **`<major>.<minor>.<build>`**, ví dụ `1.0.49`, và ch
 | Log khi khởi động | `Haxeko PM5003, firmware 1.0.49` |
 | Số phiên bản Matter dùng cho OTA (`SoftwareVersion`) | `49` |
 
-- `<build>` là số commit của repo (`git rev-list --count HEAD`): cùng một commit luôn ra cùng phiên bản, commit mới hơn luôn ra số lớn hơn, nên OTA không bao giờ coi bản mới là bản cũ. Số này đếm commit của cả repo, nên commit ở dự án khác trong repo cũng làm nó tăng.
+- `<build>` là số commit của repo (`git rev-list --count HEAD`) cộng với `FIRMWARE_BUILD_OFFSET` trong `CMakeLists.txt` (hiện là 181): cùng một commit luôn ra cùng phiên bản, commit mới hơn luôn ra số lớn hơn, nên OTA không bao giờ coi bản mới là bản cũ. Số cộng thêm này nối tiếp số build từ lúc dự án còn nằm trong repo [ESP32-IoT-Project](https://github.com/haxeko/ESP32-IoT-Project): bản cuối ở đó là `1.0.191`, commit đầu tiên tạo ở repo này là `1.0.192`. Không được giảm nó, nếu không thiết bị đang chạy bản cũ sẽ coi bản mới là bản lùi.
 - `<major>.<minor>`: sửa `FIRMWARE_VERSION_BASE` trong `CMakeLists.txt` khi ra bản lớn, ví dụ `1.0` thành `1.1`.
 - Build khi còn sửa đổi chưa commit trong `main/`, `CMakeLists.txt`, `sdkconfig.defaults` hay `partitions.csv` thì phiên bản có đuôi **`-dev`**, ví dụ `1.0.49-dev`, ở cả ứng dụng lẫn tên file. Bản phát hành là bản build từ commit đã đẩy lên git, không có `-dev`.
 - Phiên bản được tính khi CMake cấu hình dự án (sau mỗi commit hoặc checkout). Nếu sửa code sau đó mà chưa commit, bước build in cảnh báo; chạy `idf.py reconfigure` để bản build mang đuôi `-dev`.
@@ -315,7 +316,7 @@ python3 tools/gen_fonts.py Roboto-Regular.ttf Roboto-Bold.ttf > main/ui/fonts.c
 ## Cấu trúc thư mục
 
 ```
-matter-pm25-sensor/
+c3-wroom-air-quality/
 ├── CMakeLists.txt
 ├── partitions.csv
 ├── sdkconfig.defaults

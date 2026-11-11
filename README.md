@@ -2,7 +2,7 @@
 
 Thiết bị đo chất lượng không khí dùng **ESP32-C3-WROOM-02**: bụi mịn PM1.0/PM2.5/PM10 (Plantower **PMS5003**), CO2/nhiệt độ/độ ẩm (Sensirion **SCD40**), màn hình **OLED 1.3" SH1106** và 3 LED RGB địa chỉ hóa báo trạng thái.
 
-Repo gồm **phần cứng** (KiCad, file sản xuất JLCPCB) và **firmware** (đang phát triển).
+Repo gồm **phần cứng** (KiCad, file sản xuất JLCPCB) và **firmware** (Matter over Wi-Fi: Apple Home, Google Home, Home Assistant).
 
 ![Render board](docs/images/render_main.png)
 
@@ -19,7 +19,7 @@ Repo gồm **phần cứng** (KiCad, file sản xuất JLCPCB) và **firmware** 
 │   ├── docs/<bản>/           Sơ đồ nguyên lý PDF, layout PDF, BOM đầy đủ, tọa độ đầy đủ
 │   ├── mechanical/           Đường viền board (DXF) để thiết kế vỏ
 │   └── cost/                 Kho giá linh kiện + BOQ giá thành 1 sản phẩm
-├── firmware/                 Firmware ESP32-C3 (chưa có code)
+├── firmware/                 Firmware ESP32-C3: Matter over Wi-Fi (ESP-IDF + esp-matter)
 │   └── include/board_pins.h  Gán chân GPIO dùng chung cho mọi framework
 └── docs/                     Tài liệu: gán chân, đặt hàng JLC, hàn LED, sửa lỗi, lịch sử
 ```
@@ -48,7 +48,7 @@ Bản cũ v19 (5 LED, header nạp xuyên lỗ, nút RESET ở EN) không có tr
 
 - **Mở thiết kế:** KiCad 7 trở lên, mở `hardware/kicad/main/pm25.kicad_pro`.
 - **Đặt hàng:** làm theo [docs/assembly-jlcpcb.md](docs/assembly-jlcpcb.md).
-- **Viết firmware:** đọc [firmware/README.md](firmware/README.md) và dùng `firmware/include/board_pins.h`.
+- **Build và nạp firmware:** đọc [firmware/README.md](firmware/README.md). Chân GPIO đặt trong `idf.py menuconfig`; kiểm tra lỗi ghép nối theo [firmware/docs/commissioning-test-plan.md](firmware/docs/commissioning-test-plan.md).
 
 ## Tài liệu
 

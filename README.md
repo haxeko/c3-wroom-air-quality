@@ -20,7 +20,8 @@ Repo gồm **phần cứng** (KiCad, file sản xuất JLCPCB) và **firmware** 
 │   ├── mechanical/           Đường viền board (DXF) để thiết kế vỏ
 │   └── cost/                 Kho giá linh kiện + BOQ giá thành 1 sản phẩm
 ├── firmware/                 Firmware ESP32-C3: Matter over Wi-Fi (ESP-IDF + esp-matter)
-│   └── include/board_pins.h  Gán chân GPIO dùng chung cho mọi framework
+│   ├── main/                 Mã nguồn; chân GPIO đặt trong main/Kconfig.projbuild (menuconfig)
+│   └── docs/                 Kịch bản kiểm tra khi ghép nối thất bại
 └── docs/                     Tài liệu: gán chân, đặt hàng JLC, hàn LED, sửa lỗi, lịch sử
 ```
 

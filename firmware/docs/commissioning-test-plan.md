@@ -8,7 +8,7 @@ Mục tiêu: tìm xem lỗi "cắm PMS5003 + SCD40 thì quạt chạy liên tụ
 
 | File | Dùng cho | Khác bản thường |
 |---|---|---|
-| `haxeko_pm5003_pcb_diag_v<ver>_esp32c3_update.bin` | Case A–E (kể cả D2), H | Bật chẩn đoán (`CONFIG_APP_DIAG`), console ra UART0, có lệnh `matter ...`, tắt factory reset bằng 5 lần cấp nguồn |
+| `haxeko_pm5003_pcb_diag_v<ver>_esp32c3_update.bin` | Case A–E (kể cả D2), H, J | Bật chẩn đoán (`CONFIG_APP_DIAG`), console ra UART0, có lệnh `matter ...`, tắt factory reset bằng 5 lần cấp nguồn |
 | `haxeko_pm5003_pcb_diag_nosensor_v<ver>_esp32c3_update.bin` | Case F | Như trên + không chạy driver PMS5003 và SCD40 |
 | `haxeko_pm5003_pcb_diag_tx10_v<ver>_esp32c3_update.bin` | Case G | Như trên + Wi-Fi 10 dBm (thay vì 20), BLE 0 dBm (thay vì +9) |
 | `haxeko_pm5003_pcb_diag_bod4_v<ver>_esp32c3_update.bin` | Case I | Như bản diag + reset do sụt áp ngay từ khoảng **2,92 V** (mức 4) thay vì 2,51 V (mức 7, mặc định) |
@@ -37,13 +37,13 @@ Bản chẩn đoán tốn thêm khoảng 10 KB RAM (khoảng 3 KB tĩnh, còn l�
 
 Cổng USB của PCB chỉ cấp nguồn, nên bản chẩn đoán đưa log ra **UART0**:
 
-| ESP32-C3-WROOM-02 | Bộ chuyển USB-UART 3.3 V |
+| Pad nạp J5 (mặt sau, xem [docs/pinout.md](../../docs/pinout.md)) | Bộ chuyển USB-UART 3.3 V |
 |---|---|
-| TXD0 = **GPIO21** | RX |
-| RXD0 = **GPIO20** | TX |
-| GND | GND |
+| Pad 3 "TX" = TXD0 = **GPIO21** | RX |
+| Pad 4 "RX" = RXD0 = **GPIO20** | TX |
+| Pad 2 hoặc 6 "GND" | GND |
 
-115200 baud, 8N1. Không nối chân 3.3 V/5 V của bộ chuyển (thiết bị vẫn lấy nguồn như lúc dùng thật, để phép thử nguồn có nghĩa). Ghi log ra file: `idf.py -p /dev/ttyUSB0 monitor | tee caseA.log`, hoặc `minicom -C caseA.log`, PuTTY *Session logging*.
+115200 baud, 8N1. Không nối pad 1 (3V3) với chân 3.3 V/5 V của bộ chuyển (thiết bị vẫn lấy nguồn như lúc dùng thật, để phép thử nguồn có nghĩa). Ghi log ra file: `idf.py -p /dev/ttyUSB0 monitor | tee caseA.log`, hoặc `minicom -C caseA.log`, PuTTY *Session logging*.
 
 Dòng khởi động của ROM (`ESP-ROM:... rst:0x.. (...),boot:0x.. (...)`) luôn ra UART0, kể cả với bản thường: chỉ riêng dòng này đã cho biết chip có reset lặp không và vì sao.
 
@@ -98,12 +98,13 @@ Làm đúng thứ tự, mỗi case **3 lần**:
 | E | Có, **cấp 5 V riêng** (GND chung) | Có | diag | Loại trừ nguồn 5 V / sụt áp do quạt |
 | F | Có | Có | **diag_nosensor** | Loại trừ driver cảm biến của firmware |
 | G | Có | Có | **diag_tx10** | Giảm dòng đỉnh phát sóng: loại trừ nguồn 3.3 V lúc phát Wi-Fi/BLE. Để điện thoại và router trong vòng vài mét |
-| H | Có, **nối dây dài ≥ 15 cm, đặt xa module** | Có, đặt xa module | diag | Vẫn tải điện như D nhưng vỏ kim loại và dây không nằm cạnh anten: loại trừ che/nhiễu anten |
+| H | Có, **nối dây dài ≥ 15 cm, đặt xa board** | Có, đặt xa board | diag | Vẫn tải điện như D nhưng vỏ kim loại của PMS5003 và dây không nằm cạnh anten, và không thể chạm vào mặt sau board (pad nạp J5 để trần: 3V3, GND, IO9 nằm cạnh nhau; chân các giắc): loại trừ che anten và chạm chập |
+| J | Có | Có | diag | Như D nhưng **tháo màn OLED** (nếu màn cắm qua hàng rào). Theo vị trí hàng lỗ J3 và kích thước module 1.3" thông dụng (khoảng 35 × 33 mm), màn nằm phủ lên vùng anten của module ở mặt bên kia board; so `rssi` và kết quả ghép nối khi có và không có màn. Không có màn thì đọc trạng thái qua console |
 | I | Có | Có | **diag_bod4** | "Vôn kế" không cần oscilloscope: module cần tối thiểu 3,0 V, bản này reset (và đếm `B`) ngay khi 3.3 V tụt dưới khoảng 2,92 V. Làm khi D lỗi mà `B` của bản diag không tăng; chạy thêm A với bản này để so sánh |
 
 Lưu ý khi đọc case F: driver tắt nên **SCD40 không đo** (không có xung dòng 175–205 mA mỗi 5 giây), **quạt PMS5003 chạy liên tục** (tải 5 V lớn hơn bình thường) và **LED không sáng** (không có số PM2.5). F tách được lỗi phần mềm của driver, nhưng tải điện cũng khác D.
 
-LED WS2812 chỉ sáng khi đã có số PM2.5: ở case A và C (không có PMS5003) LED tắt, ở B và D LED sáng từ khoảng giây thứ 35. Với 6 LED ở độ sáng 50 % (mặc định), dòng trung bình của LED chỉ khoảng 20–35 mA ở các màu chất lượng không khí, khoảng 60 mA khi nháy trắng (Identify): nhỏ so với PMS5003 và phần phát sóng, nhưng cũng là một tải chỉ có khi cắm PMS5003.
+LED WS2812 chỉ sáng khi đã có số PM2.5: ở case A và C (không có PMS5003) LED tắt, ở B và D LED sáng từ khoảng giây thứ 35. LED XL-1615 trên board chỉ lấy 5 mA mỗi kênh màu (datasheet), nên 3 LED ở độ sáng 50 % (mặc định) lấy tổng cộng vài mA: không đáng kể so với PMS5003 và phần phát sóng.
 
 Thử nhanh không cần ứng dụng (console, bản diag): `matter esp wifi connect <ssid> <mật khẩu>` cho thiết bị vào Wi-Fi ngay, không qua BLE. So sánh giữa A và D: có vào được không, `rssi` bao nhiêu, có reset không. Đây là phép thử trực tiếp "phát Wi-Fi khi đang cắm cảm biến". Lệnh này lưu Wi-Fi vào thiết bị: thử xong phải factory reset (giữ nút 5 giây hoặc `matter esp factoryreset`) rồi mới thử ghép nối qua BLE, nếu không thiết bị đã ở sẵn trong mạng và ứng dụng sẽ đi đường khác.
 
@@ -255,7 +256,8 @@ matter esp factoryreset
 | Quạt không bao giờ dừng, `N` đứng yên, màn hình vẫn hiện số PM2.5 và LED sáng | Lệnh ngủ không tới cảm biến (`pm: sleep_retry` tăng) | Dây GPIO7 → RX cảm biến |
 | D lỗi, **E được** | Sụt áp phía 5 V do PMS5003 | Sửa đường 5 V (mục 10) |
 | D và E lỗi, **G được** | Dòng đỉnh khi phát sóng vượt khả năng mạch 3.3 V | LDO, tụ (mục 10) |
-| D, E, G lỗi, **H được** | Anten bị che hoặc nhiễu bởi cảm biến/dây | Bố trí lại, xem mục 10 |
+| D, E, G lỗi, **H được** | Anten bị che bởi cảm biến/dây, hoặc vỏ kim loại chạm mặt sau board | Bố trí lại, dán cách điện mặt sau; xem mục 10 |
+| **J được**, hoặc `rssi` tốt lên hơn 10 dB khi tháo màn | Màn OLED che anten: thiết bị chỉ còn ít dư địa sóng, thêm cảm biến ở gần là đủ hỏng | Nâng màn lên cao hơn (hàng rào cao), hoặc sửa board để anten ló ra ngoài mép màn |
 | D lỗi với `B` = 0, **I có `B` tăng** (và A với bản bod4 thì không) | Nguồn 3.3 V tụt xuống khoảng 2,5–2,9 V khi cắm cảm biến: dưới mức tối thiểu của module nhưng chưa tới ngưỡng reset mặc định, nên bản thường không reset mà chỉ lỗi sóng/ghép nối | LDO, tụ (mục 10) |
 | D lỗi, **I không có `B`** | 3.3 V không tụt dưới khoảng 2,9 V: ít khả năng là nguồn 3.3 V | Sóng (H), đấu dây (B, C) |
 | D lỗi, **F được**, không có reset | Driver cảm biến, hoặc dòng đo của SCD40 (F không cho SCD40 đo) | Tách bằng B và C; gửi log `pm:`/`co2:`/`tasks` |
@@ -265,8 +267,10 @@ matter esp factoryreset
 
 ## 10. Đo phần cứng
 
-1. **3.3 V tại chân 3V3 của module**, oscilloscope, trigger sườn xuống ở 3,0 V, trong lúc cấp nguồn và lúc ghép nối. Module cần 3,0–3,6 V và nguồn cấp được ít nhất 0,5 A (datasheet ESP32-C3-WROOM-02, bảng 6-2); dòng phát Wi-Fi đỉnh 345 mA (bảng 6-4). SCD40 lấy thêm đỉnh 175 mA, tối đa 205 mA ở 3.3 V (datasheet SCD4x, bảng 4).
-2. **5 V tại giắc PMS5003** lúc quạt khởi động: PMS5003 cần 4,5–5,5 V, dòng tới 100 mA.
-3. **5 V tại đầu vào LDO** lúc phát Wi-Fi: với LDO loại 1117 (sụt áp khoảng 1,1 V) cần trên 4,4 V.
-4. Điện áp nghỉ của **SDA/SCL**: phải là 3,3 V. Nếu thấy cao hơn, module SCD40 đang kéo lên 5 V.
-5. Chân **EN**, **GPIO9**, **GPIO8**, **GPIO2** khi cảm biến đã cắm: đều phải ở mức cao.
+Điểm đo trên board (xem [docs/pinout.md](../../docs/pinout.md)):
+
+1. **3.3 V của module** tại pad 1 của J5 (hoặc chân 3V3 của module), oscilloscope, trigger sườn xuống ở 3,0 V, trong lúc cấp nguồn và lúc ghép nối. Module cần 3,0–3,6 V và nguồn cấp được ít nhất 0,5 A (datasheet ESP32-C3-WROOM-02, bảng 6-2); dòng phát Wi-Fi đỉnh 345 mA (bảng 6-4). Đường này do U2 (AMS1117) cấp cho module và màn OLED.
+2. **3.3 V của SCD40** tại J4 chân 2: phải là 3,3 V. Đường này do U6 (AP2112K) cấp riêng, nên xung dòng đo của SCD40 (đỉnh 175 mA, tối đa 205 mA, datasheet SCD4x) đi qua U6 từ đường 5 V chứ không qua U2. Nếu đo thấy khoảng 4,2 V hoặc 2,2 V: xem [docs/troubleshooting.md](../../docs/troubleshooting.md) (U6 mất GND hoặc bị xoay khi lắp).
+3. **5 V tại J2B chân 2** (giắc PMS5003) lúc quạt khởi động và lúc phát Wi-Fi: PMS5003 cần 4,5–5,5 V, dòng tới 100 mA; U2 (sụt áp khoảng 1,1 V) cần trên 4,4 V ở đầu vào để giữ được 3,3 V. Mọi tải của board đều lấy từ đường 5 V này qua cổng USB-C.
+4. Điện áp nghỉ của **SDA/SCL** (J3 chân 1/2): phải là 3,3 V (R8, R9 kéo lên 3,3 V). Nếu thấy cao hơn, module SCD40 hoặc màn OLED đang kéo lên mức khác.
+5. **EN** và **IO9** (J5 pad 5) khi cảm biến đã cắm: đều phải ở mức cao. IO9 chỉ có điện trở kéo lên bên trong chip.

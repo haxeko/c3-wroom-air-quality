@@ -129,17 +129,17 @@ menu "Local Display and Indicators"
 
     choice OLED_CONTROLLER
         prompt "OLED controller"
-        default OLED_CONTROLLER_SSD1306
+        default OLED_CONTROLLER_SH1106
         help
-            0.96" modules are usually SSD1306, 1.3" modules SH1106. With the
-            wrong one, the image is shifted by 2 pixels and one edge shows
-            garbage columns.
-
-        config OLED_CONTROLLER_SSD1306
-            bool "SSD1306 (0.96\", the PCB)"
+            1.3" modules, as on the PCB, are usually SH1106, 0.96" modules
+            SSD1306. With the wrong one, the image is shifted by 2 pixels and
+            one edge shows garbage columns.
 
         config OLED_CONTROLLER_SH1106
-            bool "SH1106 (1.3\")"
+            bool "SH1106 (1.3\", the PCB)"
+
+        config OLED_CONTROLLER_SSD1306
+            bool "SSD1306 (0.96\")"
     endchoice
 
     config OLED_ROTATE_180
@@ -156,7 +156,9 @@ menu "Local Display and Indicators"
     config STATUS_LED_COUNT
         int "Number of WS2812 LEDs"
         range 1 64
-        default 6
+        default 3
+        help
+            3 on the PCB (LED1 to LED3).
 
     config STATUS_LED_BRIGHTNESS
         int "WS2812 brightness (%)"

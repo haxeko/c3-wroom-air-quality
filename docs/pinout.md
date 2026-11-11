@@ -65,3 +65,5 @@ Chuỗi: `IO3 → R7 → LED1 DIN → LED1 DOUT → LED2 → LED3 → (DOUT đ�
 | GND | chân 3, trên-phải | chân 2, dưới-phải |
 
 (Nhìn mặt trước, cạnh có cổng USB ở phía trên.)
+
+Số chân ở bản main là số pad của footprint KiCad (`PM25:LED_XL-1615RGBC-WS2812B`). Datasheet của XL-1615 đánh số khác: 1 GND, 2 DIN, 3 VDD, 4 DOUT; vị trí vật lý của từng chức năng thì đúng như bảng trên.

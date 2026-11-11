@@ -62,10 +62,11 @@ esp_err_t status_led_init(int gpio, int led_count)
     led_strip_rmt_config_t rmt_config = {};
     rmt_config.clk_src = RMT_CLK_SRC_DEFAULT;
     rmt_config.resolution_hz = 10 * 1000 * 1000;
-    // Use both RMT TX memory blocks (the ESP32-C3 has no RMT DMA): a 6-LED
-    // frame then needs 2 refill interrupts instead of 5, each with twice the
-    // time to run, so Wi-Fi interrupts are much less likely to delay a refill
-    // and corrupt the colors that the strip then keeps showing.
+    // Use both RMT TX memory blocks (the ESP32-C3 has no RMT DMA): the 3-LED
+    // frame of the PCB (72 symbols) then fits in them (96) and needs no refill,
+    // and a 6-LED frame needs 2 refill interrupts instead of 5, each with
+    // twice the time to run, so Wi-Fi interrupts are much less likely to delay
+    // a refill and corrupt the colors that the strip then keeps showing.
     rmt_config.mem_block_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL * 2;
 
     esp_err_t err = led_strip_new_rmt_device(&strip_config, &rmt_config, &s_strip);

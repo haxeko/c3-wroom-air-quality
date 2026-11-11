@@ -27,13 +27,13 @@ Màn hình OLED, đèn LED WS2812 và các nút nhấn (nếu lắp) chạy **t�
 
 ## Phần cứng
 
-- ESP32-C3 (ESP32-C3 SuperMini, ESP32-C3-DevKitM-1, ...), flash 4 MB
+- ESP32-C3-WROOM-02 trên PCB của repo này ([hardware/](../hardware/), chân và giắc: [docs/pinout.md](../docs/pinout.md)); cũng chạy trên board ESP32-C3 khác có flash 4 MB (ESP32-C3 SuperMini, ESP32-C3-DevKitM-1, ...)
 - Một cảm biến bụi UART:
   - **Plantower PMS5003 / PMS7003 / PMSA003** (mặc định)
   - **Nova Fitness SDS011 / SDS021**
-- Màn hình OLED 128x64 I2C (địa chỉ 0x3C): **SSD1306 0.96"** trên PCB (mặc định), hoặc SH1106 1.3" (chọn trong `menuconfig` → *OLED controller*)
+- Màn hình OLED 128x64 I2C (địa chỉ 0x3C): **SH1106 1.3"** trên PCB (mặc định), hoặc SSD1306 0.96" (chọn trong `menuconfig` → *OLED controller*)
 - Cảm biến CO2 **Sensirion SCD40 / SCD41** (I2C, địa chỉ 0x62), chung hai dây SDA/SCL với OLED
-- Dải LED **WS2812**, 6 bóng
+- **3 LED WS2812** trên PCB (XL-1615RGBC-WS2812B; số LED đổi được trong `menuconfig`)
 - Nút nhấn chính ở **GPIO10** (nút nối xuống GND)
 - Nút bật/tắt màn hình: PCB không có, có thể lắp thêm (không bắt buộc)
 
@@ -51,13 +51,14 @@ Nếu luồng Matter hoặc một task của thiết bị (cảm biến PM, cả
 | PMS5003 | RX (chân 4) | J2B chân 4 | **GPIO7** (TX của ESP32) |
 | PMS5003 | VCC 5V (chân 1) | J2B chân 2 | 5V |
 | PMS5003 | GND (chân 2) | J2B chân 1 | GND |
-| OLED SSD1306 | SDA / SCL | | **GPIO4** / **GPIO5** |
-| OLED SSD1306 | VCC / GND | | 3.3V / GND |
-| SCD40 / SCD41 | SDA / SCL | | **GPIO4** / **GPIO5** (chung với OLED) |
-| SCD40 / SCD41 | VCC / GND | | 3.3V / GND |
-| WS2812 | DIN | | **GPIO3** |
+| OLED SH1106 | SDA / SCL | J3 chân 1 / 2 | **GPIO4** / **GPIO5** (kéo lên 4,7 kΩ trên PCB) |
+| OLED SH1106 | VCC / GND | J3 chân 3 / 4 | 3.3V / GND |
+| SCD40 / SCD41 | SDA / SCL | J4 chân 3 / 4 | **GPIO4** / **GPIO5** (chung với OLED) |
+| SCD40 / SCD41 | VCC / GND | J4 chân 2 / 1 | 3.3V riêng (U6 AP2112K) / GND |
+| WS2812 | DIN | LED1 → LED2 → LED3 | **GPIO3** (qua R7 330 Ω) |
 | WS2812 | VCC / GND | | 5V / GND |
-| Nút nhấn | hai chân | | **GPIO10** và GND |
+| Nút nhấn | hai chân | SW2 | **GPIO10** và GND |
+| Nạp firmware, console của bản chẩn đoán | TX / RX / IO9 | J5 pad 3 / 4 / 5 | **GPIO21** / **GPIO20** / **GPIO9** |
 
 PMS5003 nối bắt chéo: TX của cảm biến vào chân nhận (RX) của ESP32, RX của cảm biến vào chân gửi (TX). Quạt PMS5003 cần nguồn **5V**, nhưng mức logic UART là 3.3V nên nối thẳng vào ESP32-C3 được. Chân SET/RESET của PMS (nếu có) để hở hoặc nối 3.3V. PMS5003 dùng UART1, log chạy qua USB.
 
@@ -102,9 +103,9 @@ Factory reset xóa Wi-Fi và thông tin ghép nối Matter, rồi thiết bị k
 - Cả hai cách vẫn chạy khi Matter không khởi động được: khi đó firmware xóa thẳng phân vùng NVS rồi khởi động lại.
 - Nếu phân vùng NVS không dùng được (hết trang trống, hoặc do bản ESP-IDF mới hơn ghi), firmware tự xóa nó khi khởi động. Kết quả giống factory reset: phải ghép nối lại.
 
-> **Log và nạp firmware:** log chạy qua **USB-Serial-JTAG** có sẵn trên chip (`CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y`). Nạp firmware và xem log qua **cổng USB native** của ESP32-C3 (SuperMini chỉ có cổng này).
+> **Nạp firmware trên PCB này:** cổng USB-C chỉ cấp nguồn (D+/D- không nối). Nạp qua 6 pad **J5** ở mặt sau bằng mạch USB-UART 3,3 V: pad 3 (TX, GPIO21) và pad 4 (RX, GPIO20) nối bắt chéo với mạch nạp, pad 2 hoặc 6 là GND. Nối tắt pad 5 (IO9) với pad 6 (GND) rồi cấp nguồn để vào chế độ nạp, nạp xong bỏ nối tắt và cấp nguồn lại. Chi tiết ở [docs/pinout.md](../docs/pinout.md). Trong các lệnh bên dưới, thay `/dev/ttyACM0` bằng cổng của mạch USB-UART (ví dụ `/dev/ttyUSB0`).
 >
-> Trên PCB mà cổng USB **chỉ cấp nguồn** (D+/D- không nối), log này không ra đâu cả (ESP-IDF bỏ dữ liệu khi không có máy tính đọc). Khi đó dùng bản chẩn đoán bên dưới, có console ở **UART0** (TX GPIO21, RX GPIO20, 115200 baud), hoặc đổi hẳn console trong `sdkconfig.defaults` (`CONFIG_ESP_CONSOLE_UART_DEFAULT=y`). Dòng khởi động của ROM (`rst:0x.. (...),boot:0x..`) thì luôn ra UART0.
+> **Log:** bản thường ghi log ra **USB-Serial-JTAG** có sẵn trên chip (`CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y`), nên trên PCB này log không ra đâu cả (ESP-IDF bỏ dữ liệu khi không có máy tính đọc). Muốn xem log, dùng bản chẩn đoán bên dưới, có console ở **UART0** (chính là pad TX/RX của J5, 115200 baud), hoặc đổi hẳn console trong `sdkconfig.defaults` (`CONFIG_ESP_CONSOLE_UART_DEFAULT=y`). Dòng khởi động của ROM (`rst:0x.. (...),boot:0x..`) thì luôn ra UART0. Trên board có cổng USB native (ESP32-C3 SuperMini...), nạp và xem log qua cổng đó.
 
 ### Chẩn đoán (ghép nối thất bại, cảm biến lỗi)
 
@@ -195,9 +196,9 @@ File update chỉ ghi vùng chọn phân vùng OTA và firmware, nên vẫn ch�
 |---|---|
 | I2C SDA / SCL pin (OLED và cảm biến CO2) | 4 / 5 |
 | OLED I2C address | 0x3C |
-| OLED controller | SSD1306 (0.96"). Chọn sai loại thì hình lệch 2 điểm ảnh và một mép hiện cột rác |
+| OLED controller | SH1106 (1.3"). Chọn sai loại thì hình lệch 2 điểm ảnh và một mép hiện cột rác |
 | Rotate OLED 180 degrees | tắt: hình đứng thẳng khi hàng chân của module ở trên, như trên PCB |
-| WS2812 data pin / số LED / độ sáng | 3 / 6 / 50% |
+| WS2812 data pin / số LED / độ sáng | 3 / 3 / 50% |
 | Display on/off button GPIO | `-1` (không có nút, màn hình luôn sáng) |
 
 *Button*:

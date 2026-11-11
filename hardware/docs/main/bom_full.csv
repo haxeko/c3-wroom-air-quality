@@ -1,0 +1,19 @@
+﻿Designator,Qty,Value,Footprint,Side,LCSC,MPN,Note
+"C1, C3, C7",3,22uF 16V X5R,Capacitor_SMD:C_0805_2012Metric,Bottom,C98190,CL21A226MOQNNNE,Đổi từ 25 V sang 16 V
+"C2, C8, C10, C11, C12, C18",6,100nF 50V X7R,Capacitor_SMD:C_0603_1608Metric,Bottom,C14663,CC0603KRX7R9BB104,
+"C4, C16",2,10uF 25V X5R,Capacitor_SMD:C_0805_2012Metric,Bottom,C15850,CL21A106KAYNNNE,
+"C6, C17",2,1uF 50V X5R,Capacitor_SMD:C_0603_1608Metric,Bottom,C15849,CL10A105KB8NNNC,
+F1,1,0R 1206 (jumper),Fuse:Fuse_1206_3216Metric,Bottom,C17888,1206W4F0000T5E,Không dùng cầu chì: điện trở 0 Ω nối tắt pad F1
+J1,1,USB-C 16P (power only),PM25:USB_C_HX_TYPE-C-16PIN,Bottom,C2927039,HX TYPE-C 16PIN,"Chỉ dùng VBUS/GND/CC, D+/D- để trống"
+J3,1,OLED SH1106 (4 pin),Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,Top,,,"chỉ là 4 lỗ, không có linh kiện"
+J4,1,SCD40 JST-PH 4P,Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical,Bottom,,,tự hàn (xuyên lỗ)
+J5,1,Flash pads,PM25:Flash_Pads_1x06_P2.54mm,Bottom,,,"chỉ là 6 pad nạp, không có linh kiện"
+J2B,1,PMS5003 JST-PH 4P,Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical,Bottom,,,tự hàn (xuyên lỗ)
+"LED1, LED2, LED3",3,XL-1615RGBC-WS2812B,PM25:LED_XL-1615RGBC-WS2812B,Top,C5349954,XL-1615RGBC-WS2812B,1.6 x 1.5 mm; kiểm tra dấu chân 1 trên ảnh xem trước của JLC
+"R1, R2",2,5.1k 1%,Resistor_SMD:R_0603_1608Metric,Bottom,C23186,0603WAF5101T5E,
+"R3, R4, R5",3,10k 1%,Resistor_SMD:R_0603_1608Metric,Bottom,C25804,0603WAF1002T5E,
+R7,1,330R 1%,Resistor_SMD:R_0603_1608Metric,Top,C23138,0603WAF3300T5E,
+"R8, R9",2,4.7k 1%,Resistor_SMD:R_0603_1608Metric,Bottom,C23162,0603WAF4701T5E,Kéo lên I2C (SDA/SCL) lên 3.3 V
+SW2,1,BUTTON TS-1187A,Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A,Bottom,C318884,TS-1187A-B-A-B,Nút người dùng ở IO10 (JLC Basic)
+U2,1,AMS1117-3.3,Package_TO_SOT_SMD:SOT-223-3_TabPin2,Bottom,C6186,AMS1117-3.3,
+U6,1,AP2112K-3.3,Package_TO_SOT_SMD:SOT-23-5,Bottom,C51118,AP2112K-3.3TRG1,

@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "PM25")(type "KiCad")(uri "${KIPRJMOD}/../lib/PM25.pretty")(options "")(descr "USB-C HX 16P, XL-1615 LED, TS-1187A, flash pads"))
+)

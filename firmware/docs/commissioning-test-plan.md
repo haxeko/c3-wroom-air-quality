@@ -78,7 +78,7 @@ Bộ đếm lưu trong NVS nên vẫn còn sau chính lần reset đó, và cả
 
 Làm đúng thứ tự, mỗi case **3 lần**:
 
-1. Rút nguồn. Cắm/tháo cảm biến theo case. Nối console, bắt đầu ghi log.
+1. Rút nguồn. Cắm/tháo cảm biến theo case. Giắc J4 (chữ "CO2") và J2B (chữ "PMS5003") cùng loại PH 2,0 mm 4 chân và nằm gần nhau: kiểm tra từng dây cắm đúng giắc của nó. Nối console (nếu dùng), bắt đầu ghi log.
 2. Cấp nguồn. Bấm nút 3 lần (xóa bộ đếm, màn hình hiện `N0 ...`), rồi rút và cấp nguồn lại: bộ đếm bắt đầu từ `N1`.
 3. **Để yên 90 giây**, không mở ứng dụng. Ghi: quạt có dừng sau ~35 giây không; `N` có tăng không (reset khi chưa làm gì).
 4. Nếu thiết bị đang ghép với ứng dụng nào: xóa khỏi ứng dụng, rồi giữ nút 5 giây (factory reset). `N` tăng 1 do khởi động lại: bình thường (loại "software").
@@ -98,8 +98,8 @@ Làm đúng thứ tự, mỗi case **3 lần**:
 | E | Có, **cấp 5 V riêng** (GND chung) | Có | diag | Loại trừ nguồn 5 V / sụt áp do quạt |
 | F | Có | Có | **diag_nosensor** | Loại trừ driver cảm biến của firmware |
 | G | Có | Có | **diag_tx10** | Giảm dòng đỉnh phát sóng: loại trừ nguồn 3.3 V lúc phát Wi-Fi/BLE. Để điện thoại và router trong vòng vài mét |
-| H | Có, **nối dây dài ≥ 15 cm, đặt xa board** | Có, đặt xa board | diag | Vẫn tải điện như D nhưng vỏ kim loại của PMS5003 và dây không nằm cạnh anten, và không thể chạm vào mặt sau board (pad nạp J5 để trần: 3V3, GND, IO9 nằm cạnh nhau; chân các giắc): loại trừ che anten và chạm chập |
-| J | Có | Có | diag | Như D nhưng **tháo màn OLED** (nếu màn cắm qua hàng rào). Theo vị trí hàng lỗ J3 và kích thước module 1.3" thông dụng (khoảng 35 × 33 mm), màn nằm phủ lên vùng anten của module ở mặt bên kia board; so `rssi` và kết quả ghép nối khi có và không có màn. Không có màn thì đọc trạng thái qua console |
+| H | Có, **đặt xa board hơn nữa, dây không vắt qua vùng anten** | Có, như vậy | diag | Vẫn tải điện như D nhưng cảm biến và dây nằm xa anten: loại trừ dây hoặc vỏ kim loại của cảm biến che anten |
+| J | Có | Có | diag | Như D nhưng **rút dây màn OLED**. Loại trừ màn và bó dây của nó nằm gần anten, và loại trừ bus I2C dùng chung với SCD40 có vấn đề khi cả hai cùng cắm. Không có màn thì chỉ còn kết quả ghép nối, quạt và console để đọc |
 | I | Có | Có | **diag_bod4** | "Vôn kế" không cần oscilloscope: module cần tối thiểu 3,0 V, bản này reset (và đếm `B`) ngay khi 3.3 V tụt dưới khoảng 2,92 V. Làm khi D lỗi mà `B` của bản diag không tăng; chạy thêm A với bản này để so sánh |
 
 Lưu ý khi đọc case F: driver tắt nên **SCD40 không đo** (không có xung dòng 175–205 mA mỗi 5 giây), **quạt PMS5003 chạy liên tục** (tải 5 V lớn hơn bình thường) và **LED không sáng** (không có số PM2.5). F tách được lỗi phần mềm của driver, nhưng tải điện cũng khác D.
@@ -256,8 +256,8 @@ matter esp factoryreset
 | Quạt không bao giờ dừng, `N` đứng yên, màn hình vẫn hiện số PM2.5 và LED sáng | Lệnh ngủ không tới cảm biến (`pm: sleep_retry` tăng) | Dây GPIO7 → RX cảm biến |
 | D lỗi, **E được** | Sụt áp phía 5 V do PMS5003 | Sửa đường 5 V (mục 10) |
 | D và E lỗi, **G được** | Dòng đỉnh khi phát sóng vượt khả năng mạch 3.3 V | LDO, tụ (mục 10) |
-| D, E, G lỗi, **H được** | Anten bị che bởi cảm biến/dây, hoặc vỏ kim loại chạm mặt sau board | Bố trí lại, dán cách điện mặt sau; xem mục 10 |
-| **J được**, hoặc `rssi` tốt lên hơn 10 dB khi tháo màn | Màn OLED che anten: thiết bị chỉ còn ít dư địa sóng, thêm cảm biến ở gần là đủ hỏng | Nâng màn lên cao hơn (hàng rào cao), hoặc sửa board để anten ló ra ngoài mép màn |
+| D, E, G lỗi, **H được** | Anten bị che bởi cảm biến hoặc dây | Bố trí lại dây và cảm biến xa vùng anten |
+| D lỗi, **J được** | Màn hoặc dây màn nằm gần anten (`rssi` tốt lên khi rút), hoặc bus I2C có vấn đề khi màn và SCD40 cùng cắm | So `rssi`; xem `co2:` và `oled:`; đo SDA/SCL (mục 10) |
 | D lỗi với `B` = 0, **I có `B` tăng** (và A với bản bod4 thì không) | Nguồn 3.3 V tụt xuống khoảng 2,5–2,9 V khi cắm cảm biến: dưới mức tối thiểu của module nhưng chưa tới ngưỡng reset mặc định, nên bản thường không reset mà chỉ lỗi sóng/ghép nối | LDO, tụ (mục 10) |
 | D lỗi, **I không có `B`** | 3.3 V không tụt dưới khoảng 2,9 V: ít khả năng là nguồn 3.3 V | Sóng (H), đấu dây (B, C) |
 | D lỗi, **F được**, không có reset | Driver cảm biến, hoặc dòng đo của SCD40 (F không cho SCD40 đo) | Tách bằng B và C; gửi log `pm:`/`co2:`/`tasks` |
